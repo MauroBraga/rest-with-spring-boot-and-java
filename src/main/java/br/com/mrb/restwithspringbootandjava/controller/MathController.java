@@ -13,8 +13,27 @@ public class MathController {
     @RequestMapping(value = "/sum/{numberOne}/{numberTwo}", method = RequestMethod.GET)
     public Double sum(
             @PathVariable(value = "numberOne")String numberOne
-            ,@PathVariable(value = "numberTwo")String numberTwo) {
+            ,@PathVariable(value = "numberTwo")String numberTwo) throws Exception {
 
+        if(!isNumeric(numberOne) || !isNumeric(numberTwo)){
+            throw  new Exception();
+        }
+
+        return convertToDouble(numberOne) + convertToDouble(numberTwo);
+    }
+
+    private Double convertToDouble(String strNumber) {
+        if(strNumber==null)
+            return 0D;
+        var number = strNumber.replace(",",".");
+        if(isNumeric(number))
+            return Double.parseDouble(number);
         return 0D;
+    }
+
+    private boolean isNumeric(String strNumber) {
+        if(strNumber==null)  return false;
+        var number = strNumber.replace(",",".");
+        return number.matches("[-+]?[0-9]*\\.?[0-9]+");
     }
 }
