@@ -12,8 +12,6 @@ import static br.com.mrb.restwithspringbootandjava.converters.NumberConverter.is
 
 @RestController
 public class MathController {
-    private static final String template = "Hello, %s!";
-
 
     private SimpleMath math = new SimpleMath();
 
