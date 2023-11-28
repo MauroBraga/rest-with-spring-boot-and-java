@@ -2,11 +2,9 @@ package br.com.mrb.restwithspringbootandjava.services;
 
 import br.com.mrb.restwithspringbootandjava.exceptions.ResourceNotFoundException;
 import br.com.mrb.restwithspringbootandjava.mapper.DozerMapper;
-import br.com.mrb.restwithspringbootandjava.mapper.custom.PersonMapper;
 import br.com.mrb.restwithspringbootandjava.model.Person;
 import br.com.mrb.restwithspringbootandjava.repository.PersonRepository;
 import br.com.mrb.restwithspringbootandjava.vo.v1.PersonVO;
-import br.com.mrb.restwithspringbootandjava.vo.v2.PersonVOV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,12 +40,7 @@ public class PersonServices {
         return DozerMapper.parseObject(person, PersonVO.class);
     }
 
-    public PersonVOV2 createV2(PersonVOV2 personVO) {
-        logger.info("Creating one person with V2!");
-        var person = PersonMapper.convertVoTOEntity(personVO);
-        repository.save(person);
-        return PersonMapper.convertEntityToVo(person);
-    }
+
 
     public PersonVO update(PersonVO person) {
 
