@@ -1,72 +1,75 @@
 package br.com.mrb.restwithspringbootandjava.services;
 
+import br.com.mrb.restwithspringbootandjava.exceptions.ResourceNotFoundException;
+import br.com.mrb.restwithspringbootandjava.mapper.DozerMapper;
+import br.com.mrb.restwithspringbootandjava.mapper.custom.PersonMapper;
 import br.com.mrb.restwithspringbootandjava.model.Person;
+import br.com.mrb.restwithspringbootandjava.repository.PersonRepository;
+import br.com.mrb.restwithspringbootandjava.vo.v1.PersonVO;
+import br.com.mrb.restwithspringbootandjava.vo.v2.PersonVOV2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 @Service
 public class PersonServices {
 
-    private final AtomicLong counter = new AtomicLong();
+    @Autowired
+    PersonRepository repository;
+
+
     private Logger logger = Logger.getLogger(PersonServices.class.getName());
 
 
-    public List<Person> findAll() {
-
+    public List<PersonVO> findAll() {
         logger.info("Finding all people!");
-
-        List<Person> persons = new ArrayList<>();
-        for (int i = 0; i < 8; i++) {
-            Person person = mockPerson(i);
-            persons.add(person);
-        }
-        return persons;
+        var listPerson = this.repository.findAll();
+        return DozerMapper.parseListObjects(listPerson, PersonVO.class);
     }
 
-    public Person findById(String id){
+    public PersonVO findById(Long id){
         logger.info("Find one Person");
-        var person = new Person();
-        person.setId(counter.incrementAndGet());
-        person.setFirstName("Mauro");
-        person.setLastName("Braga");
-        person.setAddress("Rio de Janeiro");
-        person.setGender("Male");
-
-        return person;
+        var person = this.repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No records found for this ID!"));
+        return DozerMapper.parseObject(person, PersonVO.class);
     }
 
-    public Person create(Person person) {
-
+    public PersonVO create(PersonVO personVO) {
         logger.info("Creating one person!");
-        person.setId(counter.incrementAndGet());
-        return person;
+        var person =DozerMapper.parseObject(personVO, Person.class);
+        repository.save(person);
+        return DozerMapper.parseObject(person, PersonVO.class);
     }
 
-    public Person update(Person person) {
+    public PersonVOV2 createV2(PersonVOV2 personVO) {
+        logger.info("Creating one person with V2!");
+        var person = PersonMapper.convertVoTOEntity(personVO);
+        repository.save(person);
+        return PersonMapper.convertEntityToVo(person);
+    }
+
+    public PersonVO update(PersonVO person) {
 
         logger.info("Updating one person!");
+        var updatePerson = this.repository.findById(person.getId()).orElseThrow(() -> new ResourceNotFoundException("No records found for this ID!"));
 
-        return person;
+        updatePerson.setFirstName(person.getFirstName());
+        updatePerson.setLastName(person.getLastName());
+        updatePerson.setAddress(person.getAddress());
+        updatePerson.setGender(person.getGender());
+
+        repository.save(updatePerson);
+
+        return DozerMapper.parseObject(updatePerson, PersonVO.class);
     }
 
-    public void delete(String id) {
-
-        logger.info("Deleting one person!");
+    public void delete(Long id) {
+      logger.info("Deleting one person!");
+        var deletePerson = this.repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No records found for this ID!"));
+       repository.delete(deletePerson);
     }
 
-    private Person mockPerson(int i) {
 
-        Person person = new Person();
-        person.setId(counter.incrementAndGet());
-        person.setFirstName("Person name " + i);
-        person.setLastName("Last name " + i);
-        person.setAddress("Some address in Brasil " + i);
-        person.setGender("Male");
-        return person;
-    }
 
 }
